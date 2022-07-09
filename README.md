@@ -6,59 +6,36 @@
 $ swiftsoup --help
 OVERVIEW: A command line tool for SwiftSoup.
 
-USAGE: swiftsoup <selector> [<html>] [--attribute <attribute>] [--decode] [--output-type <output-type>]
+USAGE: swiftsoup <selector> [<html>] [--url <url>] [--attribute <attribute>] [--decode] [--output-type <output-type>]
 
 ARGUMENTS:
   <selector>              The CSS selector to use.
-  <html>                  The HTML to parse. If not provided, or the HTML is "-", the HTML will be read from stdin. (default: -)
+  <html>                  The HTML to parse. If -, read from stdin.
 
 OPTIONS:
+  -u, --url <url>         The URL to fetch HTML content from.
   -a, --attribute <attribute>
                           Extract attribute from selected elements
   --decode                Decode HTML entities
   -o, --output-type <output-type>
                           Output type (default: outerHtml)
+  --version               Show the version.
   -h, --help              Show help information.
 ```
 
 ### Examples
-```
-$ curl -sL https://github.com/beerpiss/SwiftSoupCLI | swiftsoup "span[itemprop=author]" -o text
+```sh
+$ curl -sL https://github.com/beerpiss/SwiftSoupCLI | swiftsoup "span[itemprop=author]" --output-type text
 beerpiss
+
+# or fetch directly
+$ swiftsoup "span[itemprop=author]" --url "https://github.com/beerpiss/SwiftSoupCLI" --output-type text
+beerpiss
+
+# opt out of fetching by setting html to stdin
+$ echo "<a href=\"/help\">Send help</a>" > test.html
+$ cat test.html | swiftsoup a - --attribute "abs:href" --url "http://example.com/"
 ```
 
 ### Building on Windows
-SwiftSoup depends on pthreads, which doesn't exist on Windows, so we use a DispatchSemaphore instead:
-```diff
-diff --git a/Sources/Mutex.swift b/Sources/Mutex.swift
-index 56e6379..73d6b98 100644
---- a/Sources/Mutex.swift
-+++ b/Sources/Mutex.swift
-@@ -10,21 +10,21 @@ import Foundation
- 
- final class Mutex: NSLocking {
-     
--    private var mutex = pthread_mutex_t()
-+    private var mutex = DispatchSemaphore(value: 1)
- 
-     init() {
--        pthread_mutex_init(&mutex, nil)
-+        
-     }
- 
-     deinit {
--        pthread_mutex_destroy(&mutex)
-+        
-     }
- 
-     func lock() {
--        pthread_mutex_lock(&mutex)
-+        mutex.wait()
-     }
- 
-     func unlock() {
--        pthread_mutex_unlock(&mutex)
-+        mutex.signal()
-     }
- }
-```
+SwiftSoup depends on pthreads, which doesn't exist on Windows, so we use a DispatchSemaphore instead. Check the [patch](https://github.com/beerpiss/SwiftSoupCLI/blob/trunk/Resources/windows.patch) for details.

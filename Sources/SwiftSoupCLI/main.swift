@@ -62,9 +62,9 @@ struct SwiftSoupCLI: ParsableCommand {
 		if html == nil,
 		   let urlstr = url,
 		   let url = URL(string: urlstr),
-		   let str = try? String(contentsOf: url, encoding: .utf8) {	
+		   let str = try? String(contentsOf: url, encoding: .utf8) {
 			ret = str
-		} else if html == nil || html == "-", 
+		} else if html == nil || html == "-",
 			   let data = try? FileHandle.standardInput.readToEnd(),
 			   let str = String(data: data, encoding: .utf8) {
 			ret = str
