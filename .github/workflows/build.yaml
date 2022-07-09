@@ -97,5 +97,3 @@ jobs:
         with:
           name: swiftsoup-x86_64-unknown-windows-msvc
           path: .build/x86_64-unknown-windows-msvc/release/swiftsoup.exe
-
-

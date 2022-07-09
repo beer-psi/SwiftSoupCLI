@@ -1,6 +1,9 @@
 # SwiftSoupCLI
 [SwiftSoup](https://github.com/scinfu/SwiftSoup) from the command line.
 
+### Downloading
+Download from [nightly.link](https://nightly.link/beerpiss/SwiftSoupCLI/workflows/build.yaml/trunk).
+
 ### Usage
 ```
 $ swiftsoup --help

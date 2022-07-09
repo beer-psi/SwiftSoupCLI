@@ -1,28 +1,40 @@
 --- .build/checkouts/SwiftSoup/Sources/Mutex.swift
 +++ .build/checkouts/SwiftSoup/Sources/Mutex.swift
-@@ -10,21 +10,17 @@ import Foundation
+@@ -8,8 +8,30 @@
  
+ import Foundation
+ 
++#if os(Windows)
++import WinSDK
++#endif
++
  final class Mutex: NSLocking {
-     
--    private var mutex = pthread_mutex_t()
-+    private var semaphore: DispatchSemaphore
+-    
++#if os(Windows)
++    private var mutex = CRITICAL_SECTION()
++
++    init() {
++        InitializeCriticalSection(&mutex)
++    }
++
++    deinit {
++        DeleteCriticalSection(&mutex)
++    }
++
++    func lock() {
++        EnterCriticalSection(&mutex)
++    }
++
++    func unlock() {
++        LeaveCriticalSection(&mutex)
++    }
++#else
+     private var mutex = pthread_mutex_t()
  
      init() {
--        pthread_mutex_init(&mutex, nil)
--    }
--
--    deinit {
--        pthread_mutex_destroy(&mutex)
-+        semaphore = DispatchSemaphore(value: 1)
-     }
- 
-     func lock() {
--        pthread_mutex_lock(&mutex)
-+        semaphore.wait()
-     }
- 
+@@ -27,4 +49,5 @@ final class Mutex: NSLocking {
      func unlock() {
--        pthread_mutex_unlock(&mutex)
-+        semaphore.signal()
+         pthread_mutex_unlock(&mutex)
      }
++#endif
  }
