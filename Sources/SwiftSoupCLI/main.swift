@@ -1,7 +1,10 @@
 import Foundation
-import FoundationNetworking
 import ArgumentParser
 import SwiftSoup
+
+#if !(os(iOS) || os(watchOS) || os(tvOS) || os(macOS))
+import FoundationNetworking
+#endif
 
 struct SwiftSoupCLI: ParsableCommand {
 	static var configuration = CommandConfiguration(
