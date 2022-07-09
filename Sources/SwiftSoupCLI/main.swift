@@ -2,7 +2,7 @@ import Foundation
 import ArgumentParser
 import SwiftSoup
 
-#if !(os(iOS) || os(watchOS) || os(tvOS) || os(macOS))
+#if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
 
