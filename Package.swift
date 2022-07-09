@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "SwiftSoupCLI",
     products: [
-        .executable(name: "swiftsoup", targets: ["SwiftSoupCLI"]),
+        .executable(name: "swiftsoup", targets: ["SwiftSoupCLI"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
