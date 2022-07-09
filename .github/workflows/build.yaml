@@ -4,7 +4,7 @@ on: push
 
 jobs:
   build-macos:
-    runs-on: macos-latest
+    runs-on: macos-12
     steps:
       -
         uses: actions/checkout@v3
@@ -58,7 +58,7 @@ jobs:
       -
         uses: actions/checkout@v3
       -
-        uses: MinoruSekine/setup-scoop@v1
+        uses: MinoruSekine/setup-scoop@main
       -
         name: Install Swift
         run: |
