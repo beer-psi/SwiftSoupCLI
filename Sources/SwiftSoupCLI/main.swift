@@ -10,7 +10,7 @@ struct SwiftSoupCLI: ParsableCommand {
 	static var configuration = CommandConfiguration(
 		commandName: "swiftsoup",
 		abstract: "A command line tool for SwiftSoup.",
-		version: "0.1.0"
+		version: "0.2.0"
 	)
 
 	private enum OutputTypes: String, ExpressibleByArgument {
@@ -20,25 +20,25 @@ struct SwiftSoupCLI: ParsableCommand {
 		case untrimmedText = "untrimmedtext"
 	}
 
-	private enum CLIError: Error {
-		case noInput
-		case invalidOutputType(String)
-	}
-
 	@Argument(help: "The CSS selector to use.")
 	private var selector: String
 
 	@Argument(help: "The HTML to parse. If -, read from stdin.")
 	private var html: String?
 
-	@Option(name: .shortAndLong, help: "The URL to fetch HTML content from.")
-	private var url: String?
+	@Option(
+		name: .shortAndLong,
+		help: "The URL to fetch HTML content from.",
+		transform: { url in
+			guard let url = URL(string: url) else {
+				fatalError("Invalid URL: \(url)")
+			}
+			return url
+		})
+	private var url: URL?
 
 	@Option(name: .shortAndLong, help: "Extract attribute from selected elements")
 	private var attribute: String?
-
-	@Flag(name: .long, help: "Decode HTML entities")
-	private var decode: Bool = false
 
 	@Option(
 		name: .shortAndLong,
@@ -54,7 +54,7 @@ struct SwiftSoupCLI: ParsableCommand {
 			case "untrimmedtext":
 				return OutputTypes.untrimmedText
 			default:
-				throw CLIError.invalidOutputType(str)
+				fatalError("Unknown output type: \(str)")
 			}
 		}
 	)
@@ -63,25 +63,24 @@ struct SwiftSoupCLI: ParsableCommand {
 	func inputHtml() throws -> String {
 		let ret: String
 		if html == nil,
-		   let urlstr = url,
-		   let url = URL(string: urlstr),
+		   let url = url,
 		   let str = try? String(contentsOf: url, encoding: .utf8) {
 			ret = str
 		} else if html == nil || html == "-",
-			   let data = try? FileHandle.standardInput.readToEnd(),
+			   let data = try? FileHandle.standardInput.readToEof(),
 			   let str = String(data: data, encoding: .utf8) {
 			ret = str
 		} else if let html = html {
 			ret = html
 		} else {
-			throw CLIError.noInput
+			fatalError("No HTML input given.")
 		}
 		return ret
 	}
 
 	mutating func run() throws {
 		do {
-			let elements = try SwiftSoup.parse(try inputHtml(), url ?? "").select(selector)
+			let elements = try SwiftSoup.parse(try inputHtml(), url?.absoluteString ?? "").select(selector)
 			for element in elements.array() {
 				var output: String?
 				if let attribute = attribute {
@@ -99,19 +98,13 @@ struct SwiftSoupCLI: ParsableCommand {
 					}
 				}
 				if let output = output {
-					if decode && outputType == .text || outputType == .untrimmedText {
-						print((try? Entities.unescape(output)) ?? output)
-					} else {
-						print(output)
-					}
+					print(output)
 				}
 			}
 		} catch Exception.Error(_, let message) {
-			print("Error: Could not parse HTML: \(message)")
-			_exit(1)
+			fatalError("Error: Could not parse HTML: \(message)")
 		} catch {
-			print("Error: Could not parse HTML.")
-			_exit(1)
+			fatalError("Error: Could not parse HTML.")
 		}
 	}
 }

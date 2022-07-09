@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug swiftsoup",
+            "program": ".build/debug/swiftsoup",
+            "args": [],
+            "cwd": "${workspaceFolder:SwiftSoupCLI}",
+            "preLaunchTask": "swift: Build Debug swiftsoup"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Release swiftsoup",
+            "program": ".build/release/swiftsoup",
+            "args": [],
+            "cwd": "${workspaceFolder:SwiftSoupCLI}",
+            "preLaunchTask": "swift: Build Release swiftsoup"
+        }
+    ]
+}
