@@ -18,6 +18,7 @@ struct SwiftSoupCLI: ParsableCommand {
 	}
 
 	private enum CLIError: Error {
+		case noInput
 		case invalidOutputType(String)
 	}
 
@@ -39,8 +40,7 @@ struct SwiftSoupCLI: ParsableCommand {
 	@Option(
 		name: .shortAndLong,
 		help: "Output type",
-		transform: {
-			str in
+		transform: { str in
 			switch str.lowercased() {
 			case "html":
 				return OutputTypes.html
@@ -57,30 +57,30 @@ struct SwiftSoupCLI: ParsableCommand {
 	)
 	private var outputType: OutputTypes = .outerHtml
 
-	mutating func run() throws {
-		let _html: String;
+	func inputHtml() throws -> String {
+		let ret: String
 		if html == nil,
-			let urlstr = url,
-			let url = URL(string: urlstr),
-			let str = try? String(contentsOf: url, encoding: .utf8)
-		{	
-			_html = str
+		   let urlstr = url,
+		   let url = URL(string: urlstr),
+		   let str = try? String(contentsOf: url, encoding: .utf8) {	
+			ret = str
 		} else if html == nil || html == "-", 
-			let data = try? FileHandle.standardInput.readToEnd(),
-			let str = String(data: data, encoding: .utf8)
-		{
-			_html = str
+			   let data = try? FileHandle.standardInput.readToEnd(),
+			   let str = String(data: data, encoding: .utf8) {
+			ret = str
 		} else if let html = html {
-			_html = html
+			ret = html
 		} else {
-			print("Error: No input given.")
-			return
+			throw CLIError.noInput
 		}
+		return ret
+	}
 
+	mutating func run() throws {
 		do {
-			let elements = try SwiftSoup.parse(_html, url ?? "").select(selector)
+			let elements = try SwiftSoup.parse(try inputHtml(), url ?? "").select(selector)
 			for element in elements.array() {
-				var output: String?;
+				var output: String?
 				if let attribute = attribute {
 					output = try? element.attr(attribute)
 				} else {
