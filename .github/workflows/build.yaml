@@ -72,6 +72,15 @@ jobs:
           [System.Environment]::SetEnvironmentVariable('DEVELOPER_DIR', "$(scoop prefix swift)\Library\Developer", 'User')
           Write-Output "SDKROOT=$(scoop prefix swift)\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk" >> $env:GITHUB_ENV
           Write-Output "DEVELOPER_DIR=$(scoop prefix swift)\Library\Developer" >> $env:GITHUB_ENV
+      - 
+        name: Configure Swift
+        shell: cmd
+        run: |
+          "C:\Program Files\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\VsDevCmd.bat"
+          copy /Y %SDKROOT%\usr\share\ucrt.modulemap "%UniversalCRTSdkDir%\Include\%UCRTVersion%\ucrt\module.modulemap"
+          copy /Y %SDKROOT%\usr\share\visualc.modulemap "%VCToolsInstallDir%\include\module.modulemap"
+          copy /Y %SDKROOT%\usr\share\visualc.apinotes "%VCToolsInstallDir%\include\visualc.apinotes"
+          copy /Y %SDKROOT%\usr\share\winsdk.modulemap "%UniversalCRTSdkDir%\Include\%UCRTVersion%\um\module.modulemap"
       -
         name: Downloading SPM packages
         run: swift package update
