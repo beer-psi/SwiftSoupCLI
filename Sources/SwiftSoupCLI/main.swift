@@ -6,7 +6,7 @@ struct SwiftSoupCLI: ParsableCommand {
 	static var configuration = CommandConfiguration(
 		commandName: "swiftsoup",
 		abstract: "A command line tool for SwiftSoup.",
-		version: "0.1.0",
+		version: "0.1.0"
 	)
 
 	private enum OutputTypes: String, ExpressibleByArgument {

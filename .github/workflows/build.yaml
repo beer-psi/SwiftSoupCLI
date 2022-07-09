@@ -1,0 +1,91 @@
+name: Build
+
+on: push
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      -
+        uses: actions/checkout@v3
+      - 
+        name: Cache SwiftPM packages
+        uses: actions/cache@v3
+        with:
+          path: .build/checkouts
+          key: ${{ runner.os }}-spm-${{ hashFiles('Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-${{ hashFiles('Package.resolved') }}
+            ${{ runner.os }}-spm-
+      -
+        name: Build SwiftSoupCLI
+        run: |
+          swift build -c release --arch arm64
+          swift build -c release --arch x86_64
+          lipo -create -output .build/swiftsoup .build/arm64-apple-macosx/release/swiftsoup .build/x86_64-apple-macosx/release/swiftsoup
+      - 
+        name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: swiftsoup-apple-macosx
+          path: .build/swiftsoup
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        uses: actions/checkout@v3
+      - 
+        name: Cache SwiftPM packages
+        uses: actions/cache@v3
+        with:
+          path: .build/checkouts
+          key: ${{ runner.os }}-spm-${{ hashFiles('Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-${{ hashFiles('Package.resolved') }}
+            ${{ runner.os }}-spm-
+      -
+        name: Build SwiftSoupCLI
+        run: swift build -c release
+      - 
+        name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: swiftsoup-x86_64-unknown-linux-gnu
+          path: .build/x86_64-unknown-linux-gnu/release/swiftsoup
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      -
+        uses: actions/checkout@v3
+      -
+        uses: MinoruSekine/setup-scoop@v1
+      -
+        name: Install Swift
+        run: |
+          scoop bucket add dorado https://github.com/chawyehsu/dorado
+          scoop install swift
+          Write-Output "$(scoop prefix swift)\Library\Developer\Toolchains\unknown-Asserts-development.xctoolchain\usr\bin" >> $env:GITHUB_PATH
+          Write-Output "$(scoop prefix swift)\Library\icu-69.1\usr\bin" >> $env:GITHUB_PATH
+          Write-Output "$(scoop prefix swift)\Library\Swift-development\bin" >> $env:GITHUB_PATH
+
+          [System.Environment]::SetEnvironmentVariable('SDKROOT', "$(scoop prefix swift)\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk", 'User')
+          [System.Environment]::SetEnvironmentVariable('DEVELOPER_DIR', "$(scoop prefix swift)\Library\Developer", 'User')
+          Write-Output "SDKROOT=$(scoop prefix swift)\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk" >> $env:GITHUB_ENV
+          Write-Output "DEVELOPER_DIR=$(scoop prefix swift)\Library\Developer" >> $env:GITHUB_ENV
+      -
+        name: Downloading SPM packages
+        run: swift package update
+      -
+        name: Patching SwiftSoup to build on Windows
+        run: patch .build/checkouts/SwiftSoup/Sources/Mutex.swift Resources/windows.patch 
+      -
+        name: Build SwiftSoupCLI
+        run: swift build -c release
+      -
+        name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: swiftsoup-x86_64-unknown-windows-msvc
+          path: .build/x86_64-unknown-windows-msvc/release/swiftsoup.exe
+
+

@@ -1,0 +1,5 @@
+{
+    "yaml.schemas": {
+        "https://json.schemastore.org/github-workflow.json": "file:///c%3A/Users/beerpiss/Documents/code/SwiftSoupCLI/.github/workflows/build.yaml"
+    }
+}
