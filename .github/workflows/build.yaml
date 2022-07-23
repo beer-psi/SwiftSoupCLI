@@ -63,16 +63,10 @@ jobs:
         name: Install Swift
         run: |
           scoop bucket add dorado https://github.com/chawyehsu/dorado
-          scoop install swift
+          scoop install swift@5.6.2
           scoop install busybox
-          Write-Output "$(scoop prefix swift)\Library\Developer\Toolchains\unknown-Asserts-development.xctoolchain\usr\bin" >> $env:GITHUB_PATH
           Write-Output "$(scoop prefix swift)\Library\icu-69.1\usr\bin" >> $env:GITHUB_PATH
-          Write-Output "$(scoop prefix swift)\Library\Swift-development\bin" >> $env:GITHUB_PATH
 
-          [System.Environment]::SetEnvironmentVariable('SDKROOT', "$(scoop prefix swift)\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk", 'User')
-          [System.Environment]::SetEnvironmentVariable('DEVELOPER_DIR', "$(scoop prefix swift)\Library\Developer", 'User')
-          Write-Output "SDKROOT=$(scoop prefix swift)\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk" >> $env:GITHUB_ENV
-          Write-Output "DEVELOPER_DIR=$(scoop prefix swift)\Library\Developer" >> $env:GITHUB_ENV
       - uses: ilammy/msvc-dev-cmd@v1
       - 
         name: Configure Swift
@@ -85,9 +79,6 @@ jobs:
       -
         name: Downloading SPM packages
         run: swift package update
-      -
-        name: Patching SwiftSoup to build on Windows
-        run: patch .build\checkouts\SwiftSoup\Sources\Mutex.swift Resources\windows.patch 
       -
         name: Build SwiftSoupCLI
         run: swift build -c release
