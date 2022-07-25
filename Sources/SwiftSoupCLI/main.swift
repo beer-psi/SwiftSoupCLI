@@ -6,6 +6,7 @@ import SwiftSoup
 import FoundationNetworking
 #endif
 
+@main
 struct SwiftSoupCLI: ParsableCommand {
 	static var configuration = CommandConfiguration(
 		commandName: "swiftsoup",
@@ -108,5 +109,3 @@ struct SwiftSoupCLI: ParsableCommand {
 		}
 	}
 }
-
-SwiftSoupCLI.main()

@@ -84,7 +84,8 @@ jobs:
           Write-Output "SDKROOT=$(scoop prefix swift)\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk" >> $env:GITHUB_ENV
           Write-Output "DEVELOPER_DIR=$(scoop prefix swift)\Library\Developer" >> $env:GITHUB_ENV
 
-      - uses: ilammy/msvc-dev-cmd@v1
+      - 
+        uses: ilammy/msvc-dev-cmd@v1
       - 
         name: Configure Swift
         shell: cmd
